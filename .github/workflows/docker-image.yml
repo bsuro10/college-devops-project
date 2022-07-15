@@ -21,10 +21,10 @@ jobs:
         password: ${{ secrets.DOCKER_TOKEN }}
         
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USER }}/app:latest
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USER }}/grocery_list:latest
 
     - name: Push to Docker Hub
-      run: docker push ${{ secrets.DOCKER_USER }}/app:latest
+      run: docker push ${{ secrets.DOCKER_USER }}/grocery_list:latest
 
   deploy:
     needs: build
@@ -39,8 +39,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script_stop: true
           script: |
-            sudo docker stop app
-            sudo docker rm app
-            sudo docker rmi ${{ secrets.DOCKER_USER }}/app
-            sudo docker pull ${{ secrets.DOCKER_USER }}/app
-            sudo docker run --name app -d -p 80:3000 ${{ secrets.DOCKER_USER }}/app
+            sudo docker stop grocery_list
+            sudo docker rm grocery_list
+            sudo docker rmi ${{ secrets.DOCKER_USER }}/grocery_list
+            sudo docker pull ${{ secrets.DOCKER_USER }}/grocery_list
+            sudo docker run --name app -d -p 80:3000 ${{ secrets.DOCKER_USER }}/grocery_list
