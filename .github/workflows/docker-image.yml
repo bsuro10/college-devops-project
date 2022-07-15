@@ -3,8 +3,6 @@ name: grocery_list CICD
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
 
