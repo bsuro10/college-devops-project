@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+ansible/group_vars/docker.env
+ansible/group_vars/aws.env

@@ -1,0 +1,74 @@
+- name: Remove server and its dependencies
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - group_vars/env
+    - group_vars/aws.env
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  
+  tasks:
+  - name: Remove EC2 server(s)
+    ec2:
+      image: "{{ aws_centos_ami }}"
+      wait: yes
+      instance_type: "{{ server_type }}"
+      region: "{{ region }}"
+      count_tag:
+        Name: "{{ server_name }}"
+        Environment: "{{ env }}"
+      exact_count: 0
+      wait_timeout: 3000
+
+  - name: Remove security group
+    ec2_group:
+      name: "{{ vpc_name }} VPC SG"
+      description: "{{ vpc_name }} VPC SG"
+      region: "{{ region }}"
+      state: absent
+
+  - name: Remove route table for public subnet
+    ec2_vpc_route_table:
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ region }}"
+      state: absent
+      subnets:
+        - "{{ subnet_id }}"
+      routes:
+        - dest: 0.0.0.0/0
+          gateway_id: "{{ igw_id }}"
+      tags:
+        Name: "{{ vpc_name }}_public_rt"
+
+  - name: Remove IGW
+    ec2_vpc_igw:
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ region }}"
+      state: absent
+      tags:
+        Name: "{{ vpc_name }}_igw"
+
+  - name: Remove public subnet from the VPC
+    ec2_vpc_subnet:
+      state: absent
+      vpc_id: "{{ vpc_id }}"
+      region: "{{ region }}"
+      cidr: "{{ subnet_cidr }}"
+      map_public: yes
+      az: "{{ subnet_az }}"
+      resource_tags:
+        Name: "{{ vpc_name }}"
+      wait: yes
+
+  - name: Remove VPC
+    ec2_vpc_net:
+      name: "{{ vpc_name }}"
+      cidr_block: "{{ network }}"
+      region: "{{ region }}"
+      state: absent
+      dns_hostnames: yes
+      dns_support: yes
+      multi_ok: no
+      tags:
+        Name: "{{ vpc_name }}"
