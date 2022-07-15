@@ -1,0 +1,14 @@
+server_name: devops-project
+env: dev
+
+vpc_name: app-vpc
+network: 10.1.0.0/16
+subnet_cidr: 10.1.0.0/24
+region: eu-central-1
+subnet_az: eu-central-1a
+
+keypair: ran-key
+
+aws_centos_ami: ami-0b14f0a2730f8cbd2
+server_type: t2.micro
+server_volume_size: 10
