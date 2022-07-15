@@ -25,3 +25,49 @@ jobs:
 
     - name: Push to Docker Hub
       run: docker push ${{ secrets.DOCKER_USER }}/app:latest
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+        
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USER }}/app:latest
+
+    - name: Push to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USER }}/app:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy app
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script_stop: true
+          script: |
+            sudo docker stop app
+            sudo docker rm app
+            sudo docker rmi ${{ secrets.DOCKER_USER }}/app
+            sudo docker pull ${{ secrets.DOCKER_USER }}/app
+            sudo docker run --name app -d -p 80:3000 ${{ secrets.DOCKER_USER }}/app
