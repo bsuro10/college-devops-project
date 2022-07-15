@@ -1,4 +1,4 @@
-name: APP CICD
+name: grocery_list CICD
 
 on:
   push:
@@ -43,4 +43,4 @@ jobs:
             sudo docker rm grocery_list
             sudo docker rmi ${{ secrets.DOCKER_USER }}/grocery_list
             sudo docker pull ${{ secrets.DOCKER_USER }}/grocery_list
-            sudo docker run --name app -d -p 80:3000 ${{ secrets.DOCKER_USER }}/grocery_list
+            sudo docker run --name grocery_list -d -p 80:3000 ${{ secrets.DOCKER_USER }}/grocery_list
